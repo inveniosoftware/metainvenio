@@ -1,0 +1,33 @@
+orgs:
+  myorg:
+    teams:
+      architects:
+        permissions: admin
+        repositories: "*"
+        members:
+          - usera
+      maintainers:
+        members:
+          - usera
+          - userb
+      developers:
+        permissions: push
+        repositories: "*"
+        members:
+          - usera
+          - userb
+          - userc
+    repositories:
+      testrepo:
+        description: Test repo.
+        maintainers:
+        - usera
+        - userb
+        state: stable
+        type: independent
+      anotherrepo:
+        description: Another repo.
+        maintainers:
+        - userb
+        state: alpha
+        type: independent
