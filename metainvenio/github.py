@@ -291,7 +291,7 @@ class RepositoryAPI(GitHubAPI):
         # Create if team does not exists.
         updated = False
         if team is None:
-            orgapi.create_team(AttrDict(dict(
+            team = orgapi.create_team(AttrDict(dict(
                 name=self.conf.team,
                 repositories=[self.conf.name],
                 permission='push',

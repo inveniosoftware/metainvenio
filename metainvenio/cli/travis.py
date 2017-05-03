@@ -154,3 +154,13 @@ def travis_cron_enable(ctx):
             except Exception as e:
                 click.secho('Failed enabling {}'.format(desc), fg='red')
                 click.echo(str(e))
+
+
+@travis.command('ghsync')
+@click.pass_context
+def travis_sync(ctx):
+    """Sync list of GitHub repositories."""
+    conf = ctx.obj['config']
+    travis = ctx.obj['client']
+    travis.v2client.user().sync()
+    click.secho('Synchronizing list of GitHub repositories', fg='green')
