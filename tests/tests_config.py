@@ -26,10 +26,13 @@
 
 from __future__ import absolute_import, print_function
 
-import shutil
-import tempfile
+from metainvenio.config import ConfigParser
 
-import pytest
+
+def test_empty_conf(empty_ymlfp):
+    """Test empty config generates empty-dict data."""
+    conf = ConfigParser(empty_ymlfp)
+    assert conf.data == {}
 
 
 def test_orgs(conf):

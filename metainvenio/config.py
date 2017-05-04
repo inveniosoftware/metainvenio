@@ -36,7 +36,7 @@ class ConfigParser(object):
     def __init__(self, fp, repository=None):
         """Parse configuration file."""
         self.select_repo = repository
-        self.data = yaml.load(fp)
+        self.data = yaml.load(fp) or {}
 
     @property
     def travis(self):
