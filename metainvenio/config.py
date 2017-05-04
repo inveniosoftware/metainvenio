@@ -46,7 +46,7 @@ class ConfigParser(object):
     @property
     def organisations(self):
         """Iterator over organisations."""
-        for org_name, org in self.data['orgs'].items():
+        for org_name, org in self.data.get('orgs', {}).items():
             org.update({'name': org_name})
             yield AttrDict(org)
 
