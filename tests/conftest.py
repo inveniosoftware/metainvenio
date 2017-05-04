@@ -44,9 +44,16 @@ def ymlfp():
 
 
 @pytest.fixture()
+def empty_ymlfp():
+    """File pointer to YAML configuration file."""
+    return ''
+
+
+@pytest.fixture()
 def conf(ymlfp):
     """Test configuration."""
     return ConfigParser(ymlfp)
+
 
 
 @pytest.fixture()
