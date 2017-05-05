@@ -26,8 +26,6 @@
 
 from __future__ import absolute_import, print_function
 
-import shutil
-import tempfile
 from os.path import dirname, join
 
 import pytest
@@ -53,7 +51,6 @@ def empty_ymlfp():
 def conf(ymlfp):
     """Test configuration."""
     return ConfigParser(ymlfp)
-
 
 
 @pytest.fixture()

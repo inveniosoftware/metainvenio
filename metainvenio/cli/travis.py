@@ -28,12 +28,11 @@ from __future__ import absolute_import, print_function
 
 import click
 import yaml
-from attrdict import AttrDict
-
-from .main import cli
-from ..travis import TravisAPI
 from github3 import login
 from travispy import TravisPy
+
+from ..travis import TravisAPI
+from .main import cli
 
 
 @cli.group()
