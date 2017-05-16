@@ -125,6 +125,14 @@ class TravisAPI(object):
         })
         return get_response_contents(res)
 
+    def cron_disable(self, repo_slug):
+        """Disable all cron jobs for a repository."""
+        for cron in self.crons(repo_slug):
+            res = self.v3client.delete('{}/cron/{}'.format(V3URI, cron.id))
+            if res.status_code != 204:
+                return False
+        return True
+
     def encrypt(self, repo_slug, value):
         """Encrypt value using a repository's public key."""
         key = RSA.importKey(self.repo_key(repo_slug))
