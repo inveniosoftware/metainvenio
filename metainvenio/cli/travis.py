@@ -156,6 +156,26 @@ def travis_cron_enable(ctx):
                 click.echo(str(e))
 
 
+@travis.command('cron-disable')
+@click.pass_context
+def travis_cron_disable(ctx):
+    """Enable cron for repositories."""
+    conf = ctx.obj['config']
+    travis = ctx.obj['client']
+
+    for repo in conf.repositories:
+        if repo.travis.active:
+            continue
+
+        if travis.cron_disable(repo.slug):
+            click.secho(
+                'Disabled crons for {}'.format(repo.slug), fg='green')
+        else:
+            click.secho(
+                'Failed to disable crons for {}'.format(repo.slug),
+                fg='red')
+
+
 @travis.command('ghsync')
 @click.pass_context
 def travis_sync(ctx):
