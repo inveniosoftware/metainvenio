@@ -142,7 +142,7 @@ class OrgAPI(GitHubAPI):
                 updated = True
             # Remove members
             for m in current - expected:
-                team.revoke_membership(r)
+                team.revoke_membership(m)
                 updated = True
         return updated
 
