@@ -44,8 +44,9 @@ def github(ctx, token):
 
 
 @github.command('repos-configure')
+@click.option('--with-maintainers-file', is_flag=True)
 @click.pass_context
-def github_repo_configure(ctx):
+def github_repo_configure(ctx, with_maintainers_file=False):
     """Configure GitHub repositories."""
     conf = ctx.obj['config']
     gh = ctx.obj['client']
@@ -59,8 +60,10 @@ def github_repo_configure(ctx):
             click.echo('Updated maintainer team')
         if repoapi.update_branch_protection():
             click.echo('Updated branch protection')
-        if repoapi.update_maintainers_file():
-            click.echo('Updated MAINTAINERS file')
+        if with_maintainers_file:
+            click.echo('Checking MAINTAINERS file')
+            if repoapi.update_maintainers_file():
+                click.echo('Updated MAINTAINERS file')
         # TODO prevent merge commits
 
 
