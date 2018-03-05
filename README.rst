@@ -50,7 +50,9 @@ Based on a YAML file configuration, this CLI tool will manage e.g.:
       access restricted to a team of maintainers for the repository).
 * Travis:
     * Hook enabled/disabled state.
+    * Build status/triggering
     * Cron jobs
+    * Encryption (for e.g. PyPI deployment section in ``.travis.yml``).
 
 **Example usage:**
 

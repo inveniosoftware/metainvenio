@@ -112,13 +112,13 @@ def travis_pypi(ctx, user, password):
             continue
 
         section = travis.pypi_deploy_section(
-            conf.travis.pypideploy,
+            repo.travis.pypideploy,
             user,
             travis.encrypt(repo.slug, password),
             i18n=repo.i18n,
         )
         click.secho('Deploy section for {}'.format(repo.slug), fg='green')
-        click.echo(yaml.dump(section))
+        click.echo(yaml.dump(section, default_flow_style=False))
 
 
 @travis.command('cron-list')
@@ -184,3 +184,69 @@ def travis_sync(ctx):
     travis = ctx.obj['client']
     travis.v2client.user().sync()
     click.secho('Synchronizing list of GitHub repositories', fg='green')
+
+
+@travis.command('build-status')
+@click.option('--branch', '-b', help='Branch')
+@click.option('--with-all-branches', '-a', help='All branches', is_flag=True)
+@click.pass_context
+def travis_build_status(ctx, branch=None, with_all_branches=False):
+    """Get build status for default branch."""
+    conf = ctx.obj['config']
+    travis = ctx.obj['client']
+
+    statecolor = {
+        'passed': 'green',
+        'failed': 'red',
+        'errored': 'red',
+        'started': 'yellow',
+        'created': 'yellow',
+        'canceled': 'white',
+    }
+
+    for repo in conf.repositories:
+        if not repo.travis.active:
+            click.echo('{}: disabled'.format(repo.slug))
+
+        if with_all_branches:
+            branches = repo.branches
+        elif branch:
+            branches = [branch]
+        else:
+            branches = [repo.default_branch]
+
+        for b in branches:
+            build = travis.build_status(repo.slug, b)
+            if build is None:
+                click.secho('{}@{}: no build'.format(repo.slug, b), fg='red')
+                continue
+            click.echo(
+                '{}@{}: '.format(repo.slug, b) +
+                click.style(
+                    build['state'],
+                    fg=statecolor.get(build['state'], 'white')
+                ) +
+                ' ({})'.format(build['started_at'])
+            )
+
+
+@travis.command('build-request')
+@click.option('--branch', '-b', help='Branch')
+@click.pass_context
+def travis_build_request(ctx, branch=None):
+    """Get build status for default branch."""
+    conf = ctx.obj['config']
+    travis = ctx.obj['client']
+
+    for repo in conf.repositories:
+        branch = branch or repo.default_branch
+        if travis.build_request(repo.slug, branch):
+            click.echo(
+                '{}@{}: '.format(repo.slug, branch) +
+                click.style('requested', fg='green')
+            )
+        else:
+            click.echo(
+                '{}@{}: '.format(repo.slug, branch) +
+                click.style('failed', fg='red')
+            )
