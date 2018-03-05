@@ -33,9 +33,10 @@ from attrdict import AttrDict
 class ConfigParser(object):
     """MetaInvenio configuration file parser."""
 
-    def __init__(self, fp, repository=None):
+    def __init__(self, fp, repository=None, repository_type=None):
         """Parse configuration file."""
         self.select_repo = repository
+        self.select_type = repository_type
         self.data = yaml.load(fp) or {}
 
     @property
@@ -80,6 +81,15 @@ class ConfigParser(object):
                 'is_repo_team': True,
             })
 
+    def is_selected(self, repo):
+        """Determine if repository is selected."""
+        if self.select_repo:
+            return repo['slug'] in self.select_repo
+        elif self.select_type:
+            return repo.get('type', None) in self.select_type
+        else:
+            return True
+
     @property
     def repositories(self):
         """Iterator over repositories."""
@@ -88,12 +98,22 @@ class ConfigParser(object):
                 repo['name'] = repo_name
                 repo['org'] = org
                 repo['slug'] = '{}/{}'.format(org.name, repo_name)
-                if self.select_repo is None \
-                        or self.select_repo == repo['slug']:
+                if self.is_selected(repo) :
                     # Set default for travis
                     repo.setdefault('travis', {
                         'crons': {'master': 'daily'},
-                        'pypideploy': True,
+                        'pypideploy': {
+                            'provider': 'pypi',
+                            'user': '',
+                            'password': '',
+                            'distributions': 'sdist bdist_wheel',
+                            'on': {
+                                'tags': True,
+                                'python': '3.5',
+                                'repo': repo['slug'],
+                                'condition': '$DEPLOY = true',
+                            }
+                        },
                         'active': True,
                     })
                     repo.setdefault('branches', ['master'])

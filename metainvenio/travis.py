@@ -28,6 +28,7 @@ from __future__ import absolute_import, print_function
 
 import argparse
 import base64
+import copy
 
 import requests
 from attrdict import AttrDict
@@ -37,6 +38,12 @@ from travispy import TravisPy
 from travispy._helpers import get_response_contents
 
 from .version import __version__
+
+try:
+    from urllib.parse import quote_plus
+except ImportError:
+     from urllib import quote_plus
+
 
 V2URI = 'https://api.travis-ci.org/'
 V3URI = 'https://api.travis-ci.org/v3'
@@ -100,7 +107,7 @@ class TravisAPI(object):
     def repo_key(self, repo_slug):
         """Get repository public key."""
         s = self.v2client._session
-        endpoint = '{}/repo/{}/key'.format(s.uri, repo_slug)
+        endpoint = '{}/repos/{}/key'.format(s.uri, repo_slug)
         res = s.get(endpoint)
         if res.status_code == 200:
             return res.json()['key']
@@ -137,18 +144,13 @@ class TravisAPI(object):
         """Encrypt value using a repository's public key."""
         key = RSA.importKey(self.repo_key(repo_slug))
         cipher = PKCS1_v1_5.new(key)
-        return base64.b64encode(cipher.encrypt(value))
-
-        try:
-            res = self.v3client.get('{}/repo/{}/key'.format(V3URI, repo_slug))
-            return get_response_contents(res)
-        except Exception as e:
-            res = self.v3client.post('{}/repo/{}/key'.format(V3URI, repo_slug))
-            return get_response_contents(res)
+        return base64.b64encode(
+            cipher.encrypt(value.encode('utf8'))
+        ).decode('utf8')
 
     def pypi_deploy_section(self, template, user, secure_password, i18n=True):
         """Generate PyPI deploy section."""
-        template = copy.deepcopy(template)
+        template = copy.deepcopy(dict(template))
         template['user'] = user
         template['password'] = {'secure': secure_password}
         if i18n:
@@ -156,3 +158,24 @@ class TravisAPI(object):
         else:
             template['distributions'] = 'sdist bdist_wheel'
         return template
+
+    def build_status(self, repo_slug, branch):
+        """Get travis build status for a branch."""
+        endpoint = '{}/repo/{}/builds'.format(V3URI, quote_plus(repo_slug))
+        res = self.v3client.get(
+            endpoint,
+            params={'branch.name': branch, 'limit': 1}
+        )
+        try:
+            return res.json()['builds'][0] if res.status_code == 200 else None
+        except IndexError:
+            return None
+
+    def build_request(self, repo_slug, branch):
+        """Request a travis build of branch."""
+        endpoint = '{}/repo/{}/requests'.format(V3URI, quote_plus(repo_slug))
+        res = self.v3client.post(
+            endpoint,
+            params={'request': {'branch': branch}}
+        )
+        return res.status_code == 202
