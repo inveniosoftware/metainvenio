@@ -36,46 +36,54 @@ from .main import cli
 
 
 @cli.group()
-@click.option('--token', '-t', help='Travis token', prompt=True, default='')
+@click.option('--token', '-t', help='Travis token', default='')
+@click.option('--ghtoken', '-gt', help='GitHub token', default='')
 @click.pass_context
-def travis(ctx, token):
+def travis(ctx, token, ghtoken):
     """Repository management for Travis."""
     if not token:
-        # Help user obtain a Travis access token.
-        click.secho(
-            'You need a Travis API access token. You get it from a temporary '
-            'GitHub token. See https://docs.travis-ci.com/api#authentication.'
-            ' We will now help you obtain the token and need your GitHub '
-            'username and password for that. If you dont feel confident '
-            'providing that, simply follow instrcutions on above link.\n',
-            fg='yellow'
-        )
+        ghauth = None
+        if not ghtoken:
+            # Help user obtain a Travis access token.
+            click.secho(
+                'You need a Travis API access token. You get it from a '
+                'temporary GitHub token. See '
+                'https://docs.travis-ci.com/api#authentication. We will now '
+                'help you obtain the token and need your GitHub '
+                'username and password for that. If you dont feel confident '
+                'providing that, simply follow instrcutions on above link.\n',
+                fg='yellow'
+            )
 
-        # Query for GitHub username, password and two-factor code if needed.
-        def callback_2fa():
-            code = ''
-            while not code:
-                code = click.prompt('Enter 2FA code', type=str)
-            return code
+            # Query for GitHub username, password and two-factor code if needed
+            def callback_2fa():
+                code = ''
+                while not code:
+                    code = click.prompt('Enter 2FA code', type=str)
+                return code
 
-        user = click.prompt('GitHub username', type=str)
-        password = click.prompt('GitHub password', type=str, hide_input=True)
-        scopes = [
-            'read:org', 'user:email', 'repo_deployment',
-            'repo:status', 'public_repo', 'write:repo_hook'
-        ]
+            user = click.prompt('GitHub username', type=str)
+            password = click.prompt(
+                'GitHub password', type=str, hide_input=True)
+            scopes = [
+                'read:org', 'user:email', 'repo_deployment',
+                'repo:status', 'public_repo', 'write:repo_hook'
+            ]
 
-        # Create temporary GitHub token.
-        gh = login(user, password, two_factor_callback=callback_2fa)
-        ghauth = gh.authorize(
-            user, password, scopes=scopes, note='Travis CI temporary token')
+            # Create temporary GitHub token.
+            gh = login(user, password, two_factor_callback=callback_2fa)
+            ghauth = gh.authorize(
+                user, password, scopes=scopes,
+                note='Travis CI temporary token')
+            ghtoken = ghauth.token
 
         # Exchange GitHub token for Travis token
         token = TravisPy.github_auth(
-            ghauth.token)._session.headers['Authorization'][len('token '):]
+            ghtoken)._session.headers['Authorization'][len('token '):]
 
-        # Delete GitHub token again
-        ghauth.delete()
+        if ghauth is not None:
+            # Delete GitHub token again
+            ghauth.delete()
 
         click.secho('Your Travis token is: {}'.format(token), fg='green')
 
@@ -100,7 +108,8 @@ def travis_state_set(ctx):
 
 @travis.command('pypi')
 @click.option('--user', '-u', help='PyPI user', prompt=True)
-@click.option('--password', '-p', help='PyPI password', prompt=True)
+@click.option('--password', '-p', help='PyPI password', prompt=True,
+              hide_input=True)
 @click.pass_context
 def travis_pypi(ctx, user, password):
     """Create PyPI deployment section for repositories."""
@@ -250,3 +259,19 @@ def travis_build_request(ctx, branch=None):
                 '{}@{}: '.format(repo.slug, branch) +
                 click.style('failed', fg='red')
             )
+
+
+@travis.command('encrypt')
+@click.option('--value', '-v', help='Value to encrypt', prompt=True,
+              hide_input=True)
+@click.pass_context
+def travis_encrypt(ctx, value):
+    """Encrypt the same value for multiple repositories."""
+    conf = ctx.obj['config']
+    travis = ctx.obj['client']
+
+    for repo in conf.repositories:
+        if not repo.travis.active:
+            continue
+        encrypted_value = travis.encrypt(repo.slug, value)
+        click.echo('{}: {}'.format(repo.slug, encrypted_value))

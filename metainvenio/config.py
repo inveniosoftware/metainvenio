@@ -98,7 +98,7 @@ class ConfigParser(object):
                 repo['name'] = repo_name
                 repo['org'] = org
                 repo['slug'] = '{}/{}'.format(org.name, repo_name)
-                if self.is_selected(repo) :
+                if self.is_selected(repo):
                     # Set default for travis
                     repo.setdefault('travis', {
                         'crons': {'master': 'daily'},
