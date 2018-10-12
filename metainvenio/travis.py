@@ -42,7 +42,7 @@ from .version import __version__
 try:
     from urllib.parse import quote_plus
 except ImportError:
-     from urllib import quote_plus
+    from urllib import quote_plus
 
 
 V2URI = 'https://api.travis-ci.org/'

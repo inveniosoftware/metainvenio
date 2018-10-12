@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2017 CERN.
+# Copyright (C) 2019 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -22,30 +22,33 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""Command line interface for MetaInvenio."""
+"""PyPI API."""
 
 from __future__ import absolute_import, print_function
 
-import click
-import yaml
-from attrdict import AttrDict
-
-from ..config import ConfigParser
+import requests
 
 
-@click.group()
-@click.option(
-    '--config', '-c', help='Configuration file path.', type=click.File(),
-    required=True)
-@click.option('--repository', '-r', help='Repository slug', default=None,
-              multiple=True)
-@click.option('--repository-type', '-t', help='Repository type', default=None,
-              multiple=True)
-@click.pass_context
-def cli(ctx, config, repository=None, repository_type=None):
-    """Management tools for Invenio modules."""
-    ctx.obj = AttrDict({'config': ConfigParser(
-        config,
-        repository=repository,
-        repository_type=repository_type,
-    )})
+class PyPIAPI(object):
+    """Python Package Index API client."""
+
+    def __init__(self):
+        """Initialize API class."""
+        self.client = requests.Session()
+
+    def latest_release(self, package_name):
+        """Get information about latest release for a given package."""
+        endpoint = 'https://pypi.org/pypi/{}/json'.format(package_name)
+        res = self.client.get(endpoint)
+        if res.status_code == 200:
+            return res.json()
+        return None
+
+    @staticmethod
+    def development_status(classifiers):
+        """Find development status classifier."""
+        for c in classifiers:
+            parts = [x.strip() for x in c.split('::')]
+            if parts[0] == 'Development Status':
+                return parts[1]
+        return 'Unknown'
