@@ -33,6 +33,7 @@ from json import dumps
 from attrdict import AttrDict
 from github3 import GitHub
 from github3.decorators import requires_auth
+from github3.exceptions import NotFoundError
 from github3.orgs import Organization, Team
 from github3.repos.branch import Branch
 
@@ -260,6 +261,24 @@ class RepositoryAPI(GitHubAPI):
                     self.conf.name))
         return True
 
+    def update_pull_req_template(self):
+        """Update pull request template file."""
+        filepath = '.github/pull_request_template.md'
+        commit_message = 'global: pull request template update'
+
+        content = self._get_dir_contents(filepath)
+        with open(filepath, 'r') as f:
+            template = f.read()
+        if content:
+            parsed = self._parse_pull_request_template(content)
+            if parsed == template:
+                return False
+            content.update(commit_message, template)
+        else:
+            self._ghrepo.create_file(
+                filepath, commit_message, template or b'\n')
+        return True
+
     def update_maintainers_file(self):
         """Update maintainers file."""
         maintainers = "\n".join(sorted(self.conf.maintainers)).encode('utf8')
@@ -336,6 +355,15 @@ class RepositoryAPI(GitHubAPI):
             return None
         return contents
 
+    def _get_dir_contents(self, dirpath):
+        try:
+            directory = self._ghrepo.file_contents(dirpath)
+            if not bool(directory):
+                return None
+            return directory
+        except NotFoundError as e:
+            return None
+
     @staticmethod
     def _parse_maintainers_file(contents):
         """Parse MAINTAINERS file."""
@@ -349,6 +377,10 @@ class RepositoryAPI(GitHubAPI):
                 continue
             lines.append(m.group(1))
         return lines
+
+    @staticmethod
+    def _parse_pull_request_template(contents):
+        return contents.decoded.decode('utf8')
 
     def yaml_template(self):
         """Generate a yaml template for a repository."""
