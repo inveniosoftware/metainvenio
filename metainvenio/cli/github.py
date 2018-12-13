@@ -45,8 +45,10 @@ def github(ctx, token):
 
 @github.command('repos-configure')
 @click.option('--with-maintainers-file', is_flag=True)
+@click.option('--with-pull-template', is_flag=True)
 @click.pass_context
-def github_repo_configure(ctx, with_maintainers_file=False):
+def github_repo_configure(ctx, with_maintainers_file=False,
+                          with_pull_template=False):
     """Configure GitHub repositories."""
     conf = ctx.obj['config']
     gh = ctx.obj['client']
@@ -64,6 +66,10 @@ def github_repo_configure(ctx, with_maintainers_file=False):
             click.echo('Checking MAINTAINERS file')
             if repoapi.update_maintainers_file():
                 click.echo('Updated MAINTAINERS file')
+        if with_pull_template:
+            click.echo('Checking pull request template')
+            if repoapi.update_pull_req_template():
+                click.echo('Updated pull request template')
         # TODO prevent merge commits
 
 

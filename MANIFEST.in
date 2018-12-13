@@ -29,6 +29,7 @@ include MAINTAINERS
 include pytest.ini
 include .dockerignore
 include .editorconfig
+include .github/pull_request_template.md
 include requirements-devel.txt
 include docs/requirements.txt
 recursive-include docs *.bat
