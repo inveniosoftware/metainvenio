@@ -214,8 +214,9 @@ def travis_build_status(ctx, branch=None, with_all_branches=False):
     }
 
     for repo in conf.repositories:
-        if not repo.travis.active:
+        if not repo.travis.get('active', True):
             click.echo('{}: disabled'.format(repo.slug))
+            continue
 
         if with_all_branches:
             branches = repo.branches
@@ -241,13 +242,25 @@ def travis_build_status(ctx, branch=None, with_all_branches=False):
 
 @travis.command('build-request')
 @click.option('--branch', '-b', help='Branch')
+@click.option('--repos', '-r', type=click.STRING, help='Comma separated ' +
+                                                       'list of GitHub ' +
+                                                       'repositories names')
 @click.pass_context
-def travis_build_request(ctx, branch=None):
-    """Get build status for default branch."""
+def travis_build_request(ctx, branch=None, repos=None):
+    """Trigger a new build on default branch of all repositories."""
     conf = ctx.obj['config']
     travis = ctx.obj['client']
 
-    for repo in conf.repositories:
+    repositories = conf.repositories
+    if repos:
+        repos = [r.strip() for r in repos.split(',')]
+        repositories = filter(lambda r: r['name'] in repos, repositories)
+
+    for repo in repositories:
+        if not repo.travis.get('active', True):
+            click.echo('{}: disabled'.format(repo.slug))
+            continue
+
         branch = branch or repo.default_branch
         if travis.build_request(repo.slug, branch):
             click.echo(
