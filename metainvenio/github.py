@@ -351,14 +351,14 @@ class RepositoryAPI(GitHubAPI):
             team = orgapi.create_team(AttrDict(dict(
                 name=self.conf.team,
                 repositories=[self.conf.name],
-                permission='push',
+                permission='maintain',
             )))
             updated = True
 
         # Sync member/repo list if team exists
         if orgapi.sync_team_members(team, self.conf.maintainers):
             updated = True
-        if orgapi.sync_team_repositories(team, 'push', [self.conf.name]):
+        if orgapi.sync_team_repositories(team, 'maintain', [self.conf.name]):
             updated = True
         return updated
 

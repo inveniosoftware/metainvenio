@@ -65,8 +65,8 @@ def test_teams(conf):
         ('architects', 1, 'admin', 2),
         ('maintainers', 2, 'pull', 0),
         ('developers', 3, 'push', 2),
-        ('testrepo-maintainers', 2, 'push', 1),
-        ('anotherrepo-maintainers', 1, 'push', 1),
+        ('testrepo-maintainers', 2, 'maintain', 1),
+        ('anotherrepo-maintainers', 1, 'maintain', 1),
     ]
 
 
