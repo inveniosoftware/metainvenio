@@ -77,7 +77,7 @@ class ConfigParser(object):
                 'members': maintainers,
                 'org': org,
                 'repositories': [repo.name],
-                'permission': 'push',
+                'permission': 'maintain',
                 'is_repo_team': True,
             })
 
