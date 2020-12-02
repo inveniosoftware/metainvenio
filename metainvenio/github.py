@@ -35,9 +35,8 @@ from github3 import GitHub
 from github3.decorators import requires_auth
 from github3.exceptions import NotFoundError
 from github3.orgs import Organization, Team
-from github3.repos.branch import Branch
 from github3.repos import Repository
-
+from github3.repos.branch import Branch
 
 LINE_RE = re.compile('(.+)')
 
@@ -262,8 +261,6 @@ class RepositoryAPI(GitHubAPI):
         repo = self.gh.repository(self.conf.org.name, self.conf.name)
         return ExtendedRepository(repo.as_dict(), session=repo.session)
 
-
-
     def update_settings(self):
         """Update repository settings."""
         repo = self._ghrepo
@@ -404,12 +401,12 @@ class RepositoryAPI(GitHubAPI):
     def _parse_maintainers_file(contents):
         """Parse MAINTAINERS file."""
         lines = []
-        for l in contents.decoded.decode('utf8').split('\n'):
-            if not l.strip():
+        for line in contents.decoded.decode('utf8').split('\n'):
+            if not line.strip():
                 continue
-            m = LINE_RE.match(l)
+            m = LINE_RE.match(line)
             if not m:
-                print('Failed to match: {}'.format(l))
+                print('Failed to match: {}'.format(line))
                 continue
             lines.append(m.group(1))
         return lines
