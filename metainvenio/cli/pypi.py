@@ -61,9 +61,11 @@ def pypi_latest_release(ctx):
             )
         else:
             status = pypi.development_status(data['info']['classifiers'])
-            click.echo('{repo}: {version} ({status})'.format(
+            release = data['releases'][data['info']['version']][0]
+            click.echo('{repo}: {version} ({status} - {release_date})'.format(
                     repo=repo.slug,
                     version=data['info']['version'],
                     status=status,
+                    release_date=release['upload_time'][:10],
                 )
             )

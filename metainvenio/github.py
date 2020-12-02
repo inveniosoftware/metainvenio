@@ -36,6 +36,8 @@ from github3.decorators import requires_auth
 from github3.exceptions import NotFoundError
 from github3.orgs import Organization, Team
 from github3.repos.branch import Branch
+from github3.repos import Repository
+
 
 LINE_RE = re.compile('(.+)')
 
@@ -68,11 +70,37 @@ class ExtendedTeam(Team):
         return self._boolean(self._put(url, data=dumps(data)), 204, 404)
 
 
+class ExtendedRepository(Repository):
+    """Branch extension."""
+
+    def edit(self, name, description=None, homepage=None, private=None,
+             has_issues=None, has_wiki=None, has_downloads=None,
+             default_branch=None, allow_merge_commit=None,
+             allow_rebase_merge=None, allow_squash_merge=None):
+        """Edit this repository."""
+        edit = {'name': name, 'description': description, 'homepage': homepage,
+                'private': private, 'has_issues': has_issues,
+                'has_wiki': has_wiki, 'has_downloads': has_downloads,
+                'default_branch': default_branch,
+                'allow_merge_commit': allow_merge_commit,
+                'allow_rebase_merge': allow_rebase_merge,
+                'allow_squash_merge': allow_squash_merge}
+
+        self._remove_none(edit)
+        json = None
+        if edit:
+            json = self._json(self._patch(self._api, data=dumps(edit)), 200)
+            self._update_attributes(json)
+            return True
+        return False
+
+
 class ExtendedBranch(Branch):
     """Branch extension."""
 
     def protect(self, required_status_checks=None,
                 required_pull_request_reviews=None,
+                required_linear_history=True,
                 dismissal_restrictions=None,
                 restrictions=None, enforce_admins=None):
         """Enable branch protection (with all features)."""
@@ -82,6 +110,7 @@ class ExtendedBranch(Branch):
             'dismissal_restrictions': dismissal_restrictions,
             'restrictions': restrictions,
             'enforce_admins': enforce_admins,
+            'required_linear_history': required_linear_history,
         }
 
         url = self._build_url('protection', base_url=self._api)
@@ -230,7 +259,10 @@ class RepositoryAPI(GitHubAPI):
 
     @property
     def _ghrepo(self):
-        return self.gh.repository(self.conf.org.name, self.conf.name)
+        repo = self.gh.repository(self.conf.org.name, self.conf.name)
+        return ExtendedRepository(repo.as_dict(), session=repo.session)
+
+
 
     def update_settings(self):
         """Update repository settings."""
@@ -242,6 +274,9 @@ class RepositoryAPI(GitHubAPI):
             repo.has_issues != self.conf.has_issues,
             repo.has_wiki != self.conf.has_wiki,
             repo.default_branch != self.conf.default_branch,
+            repo.allow_merge_commit != self.conf.allow_merge_commit,
+            repo.allow_rebase_merge != self.conf.allow_rebase_merge,
+            repo.allow_squash_merge != self.conf.allow_squash_merge,
         ])
 
         if not is_dirty:
@@ -254,6 +289,9 @@ class RepositoryAPI(GitHubAPI):
             has_issues=self.conf.has_issues,
             has_wiki=self.conf.has_wiki,
             default_branch=self.conf.default_branch,
+            allow_merge_commit=self.conf.allow_merge_commit,
+            allow_rebase_merge=self.conf.allow_rebase_merge,
+            allow_squash_merge=self.conf.allow_squash_merge,
         )
         if not res:
             raise RuntimeError(
@@ -331,16 +369,14 @@ class RepositoryAPI(GitHubAPI):
             branch = repo.branch(branch_name)
             branch = ExtendedBranch(branch.as_dict(), session=branch.session)
             branch.protect(
-                required_status_checks=dict(
-                    include_admins=True,
-                    strict=True,
-                    contexts=[
-                        'continuous-integration/travis-ci',
-                        # 'coverage/coveralls'
-                    ]
-                ),
+                required_status_checks=None,
                 required_pull_request_reviews=None,
+                required_linear_history=True,
                 restrictions=dict(
+                    users=[],
+                    teams=[self.conf.team],
+                ),
+                dismissal_restrictions=dict(
                     users=[],
                     teams=[self.conf.team],
                 ),

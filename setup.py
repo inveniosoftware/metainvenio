@@ -60,7 +60,7 @@ setup_requires = [
 install_requires = [
     'attrdict>=2.0.0',
     'click>=6.0.0',
-    'github3.py>=1.0.0a4',
+    'github3.py==1.0.0a4',
     'pyaml>=16.12.2',
     'pycrypto>=2.6.1',
     'PyYAML>=3.12',
