@@ -102,20 +102,10 @@ class ConfigParser(object):
                     # Set default for travis
                     repo.setdefault('travis', {
                         'crons': {'master': 'daily'},
-                        'pypideploy': {
-                            'provider': 'pypi',
-                            'user': '',
-                            'password': '',
-                            'distributions': 'sdist bdist_wheel',
-                            'on': {
-                                'tags': True,
-                                'python': '3.5',
-                                'repo': repo['slug'],
-                                'condition': '$DEPLOY = true',
-                            }
-                        },
-                        'active': True,
+                        'pypideploy': False,
+                        'active': False,
                     })
+                    repo.setdefault('pypi', True)
                     repo.setdefault('branches', ['master'])
                     repo.setdefault('i18n', True)
                     repo.setdefault('has_issues', True)
