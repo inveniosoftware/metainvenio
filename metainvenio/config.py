@@ -24,8 +24,6 @@
 
 """Configuration file parser."""
 
-from __future__ import absolute_import, print_function
-
 import yaml
 from attrdict import AttrDict
 
@@ -38,11 +36,6 @@ class ConfigParser(object):
         self.select_repo = repository
         self.select_type = repository_type
         self.data = yaml.load(fp) or {}
-
-    @property
-    def travis(self):
-        """Section for Travis."""
-        return self.data.get('travis', {'deploy', {}})
 
     @property
     def organisations(self):
@@ -99,12 +92,6 @@ class ConfigParser(object):
                 repo['org'] = org
                 repo['slug'] = '{}/{}'.format(org.name, repo_name)
                 if self.is_selected(repo):
-                    # Set default for travis
-                    repo.setdefault('travis', {
-                        'crons': {'master': 'daily'},
-                        'pypideploy': False,
-                        'active': False,
-                    })
                     repo.setdefault('pypi', True)
                     repo.setdefault('branches', ['master'])
                     repo.setdefault('i18n', True)

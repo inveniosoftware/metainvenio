@@ -22,19 +22,22 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-include *.rst
-include *.sh
-include LICENSE
-include MAINTAINERS
-include pytest.ini
 include .dockerignore
 include .editorconfig
-include .github/pull_request_template.md
-include requirements-devel.txt
-include docs/requirements.txt
-recursive-include docs *.bat
-recursive-include docs *.py
-recursive-include docs *.rst
-recursive-include docs Makefile
+include *.cfg
+include *.py
+include *.py
+include *.rst
+include *.txt
+include *.yml
+include *.toml
+include MAINTAINERS
+include LICENSE
+include run-tests.sh
+recursive-exclude .github/workflows *.yml
+recursive-include examples *.py
+recursive-include tests *.html
+recursive-include tests *.js
 recursive-include tests *.py
 recursive-include tests *.yml
+include .git-blame-ignore-revs

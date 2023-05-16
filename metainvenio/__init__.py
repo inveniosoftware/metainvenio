@@ -26,6 +26,6 @@
 
 from __future__ import absolute_import, print_function
 
-from .version import __version__
+__version__ = '0.1.0.dev20170000'
 
 __all__ = ('__version__', )

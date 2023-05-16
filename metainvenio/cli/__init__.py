@@ -34,4 +34,3 @@ from .conf import conf
 from .github import github
 from .main import cli
 from .pypi import pypi
-from .travis import travis

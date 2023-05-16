@@ -42,17 +42,11 @@ def pypi(ctx):
 @pypi.command('latest-release')
 @click.pass_context
 def pypi_latest_release(ctx):
-    """Ensure Travis is enabled/disabled."""
+    """Get latest release."""
     conf = ctx.obj['config']
     pypi = ctx.obj['client']
 
     for repo in conf.repositories:
-        if not getattr(repo.travis, 'pypideploy', False):
-            click.echo(
-                '{}: '.format(repo.slug) +
-                click.style('skipped', fg='yellow')
-            )
-            continue
         data = pypi.latest_release(repo.name)
         if not data:
             click.echo(

@@ -25,9 +25,6 @@
  MetaInvenio
 =============
 
-.. image:: https://img.shields.io/travis/inveniosoftware/metainvenio.svg
-        :target: https://travis-ci.org/inveniosoftware/metainvenio
-
 .. image:: https://img.shields.io/coveralls/inveniosoftware/metainvenio.svg
         :target: https://coveralls.io/r/inveniosoftware/metainvenio
 
@@ -48,11 +45,6 @@ Based on a YAML file configuration, this CLI tool will manage e.g.:
     * Organisation teams, their members and repository permissions.
     * Repository settings, MAINTAINERS file, branch protection (with push
       access restricted to a team of maintainers for the repository).
-* Travis:
-    * Hook enabled/disabled state.
-    * Build status/triggering
-    * Cron jobs
-    * Encryption (for e.g. PyPI deployment section in ``.travis.yml``).
 
 **Example usage:**
 
@@ -81,5 +73,3 @@ Then provide the YAMl file to the tool and run e.g.:
 
     $ metainvenio -c conf.yml github -t <token> teams-sync
     $ metainvenio -c conf.yml github -t <token> repos-configure
-
-Further documentation is available on https://metainvenio.readthedocs.io/
