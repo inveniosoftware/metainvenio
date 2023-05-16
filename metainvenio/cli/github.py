@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2017 CERN.
+# Copyright (C) 2017-2023 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -24,11 +24,8 @@
 
 """Command line interface for MetaInvenio."""
 
-from __future__ import absolute_import, print_function
-
 import click
 import yaml
-from attrdict import AttrDict
 from github3 import GitHub
 
 from ..github import OrgAPI, RepositoryAPI
@@ -69,7 +66,6 @@ def github_repo_configure(ctx, with_maintainers_file=False, with_pull_template=F
             click.echo("Checking pull request template")
             if repoapi.update_pull_req_template():
                 click.echo("Updated pull request template")
-        # TODO prevent merge commits
 
 
 @github.command("teams-sync")

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2017 CERN.
+# Copyright (C) 2017-2023 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -29,7 +29,6 @@ import re
 from json import dumps
 
 from attrdict import AttrDict
-from github3 import GitHub
 from github3.decorators import requires_auth
 from github3.exceptions import NotFoundError
 from github3.orgs import Organization, Team
