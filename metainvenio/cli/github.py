@@ -36,63 +36,62 @@ from .main import cli
 
 
 @cli.group()
-@click.option('--token', '-t', help='GitHub token', prompt=True)
+@click.option("--token", "-t", help="GitHub token", prompt=True)
 @click.pass_context
 def github(ctx, token):
     """Repository management for GitHub."""
-    ctx.obj['client'] = GitHub(token=token)
+    ctx.obj["client"] = GitHub(token=token)
 
 
-@github.command('repos-configure')
-@click.option('--with-maintainers-file', is_flag=True)
-@click.option('--with-pull-template', is_flag=True)
+@github.command("repos-configure")
+@click.option("--with-maintainers-file", is_flag=True)
+@click.option("--with-pull-template", is_flag=True)
 @click.pass_context
-def github_repo_configure(ctx, with_maintainers_file=False,
-                          with_pull_template=False):
+def github_repo_configure(ctx, with_maintainers_file=False, with_pull_template=False):
     """Configure GitHub repositories."""
-    conf = ctx.obj['config']
-    gh = ctx.obj['client']
+    conf = ctx.obj["config"]
+    gh = ctx.obj["client"]
 
     for repo in conf.repositories:
-        click.echo('Configuring {}'.format(repo.slug))
+        click.echo("Configuring {}".format(repo.slug))
         repoapi = RepositoryAPI(gh, conf=repo)
         if repoapi.update_settings():
-            click.echo('Updated settings')
+            click.echo("Updated settings")
         if repoapi.update_team():
-            click.echo('Updated maintainer team')
+            click.echo("Updated maintainer team")
         if repoapi.update_branch_protection():
-            click.echo('Updated branch protection')
+            click.echo("Updated branch protection")
         if with_maintainers_file:
-            click.echo('Checking MAINTAINERS file')
+            click.echo("Checking MAINTAINERS file")
             if repoapi.update_maintainers_file():
-                click.echo('Updated MAINTAINERS file')
+                click.echo("Updated MAINTAINERS file")
         if with_pull_template:
-            click.echo('Checking pull request template')
+            click.echo("Checking pull request template")
             if repoapi.update_pull_req_template():
-                click.echo('Updated pull request template')
+                click.echo("Updated pull request template")
         # TODO prevent merge commits
 
 
-@github.command('teams-sync')
+@github.command("teams-sync")
 @click.pass_context
 def github_teams_sync(ctx):
     """Synchronize GitHub teams."""
-    conf = ctx.obj['config']
-    gh = ctx.obj['client']
+    conf = ctx.obj["config"]
+    gh = ctx.obj["client"]
 
     for org in conf.organisations:
-        click.echo('Configuring {} teams'.format(org.name))
+        click.echo("Configuring {} teams".format(org.name))
         orgapi = OrgAPI(gh, conf=org)
         if orgapi.update_teams([t for t in conf.teams if t.org == org]):
-            click.echo('Updated organisation teams')
+            click.echo("Updated organisation teams")
 
 
-@github.command('repos-conf-check')
+@github.command("repos-conf-check")
 @click.pass_context
 def github_repo_list(ctx):
     """List repositories in organisations."""
-    conf = ctx.obj['config']
-    gh = ctx.obj['client']
+    conf = ctx.obj["config"]
+    gh = ctx.obj["client"]
 
     for org in conf.organisations:
         orgapi = OrgAPI(gh, conf=org)
@@ -103,36 +102,35 @@ def github_repo_list(ctx):
         removed = confrepos - ghrepos
 
         if added:
-            click.secho(
-                'Missing {} repositories'.format(org.name), fg='yellow')
+            click.secho("Missing {} repositories".format(org.name), fg="yellow")
             for r in sorted(added):
                 click.echo(r)
         if removed:
-            click.secho(
-                'Removed {} repositories'.format(org.name), fg='yellow')
+            click.secho("Removed {} repositories".format(org.name), fg="yellow")
             for r in sorted(removed):
                 click.echo(r)
         if not added and not removed:
-            click.secho(
-                'Configuration for {} in sync'.format(org.name), fg='green')
+            click.secho("Configuration for {} in sync".format(org.name), fg="green")
 
 
-@github.command('yaml-template')
+@github.command("yaml-template")
 @click.pass_context
 def github_yaml_template(ctx):
     """Generate YAML template of repositories."""
-    conf = ctx.obj['config']
-    gh = ctx.obj['client']
+    conf = ctx.obj["config"]
+    gh = ctx.obj["client"]
 
-    data = {'orgs': {}}
+    data = {"orgs": {}}
 
     for org in conf.organisations:
-        click.secho('Fetching data for {}'.format(org.name), fg='green')
+        click.secho("Fetching data for {}".format(org.name), fg="green")
         orgapi = OrgAPI(gh, conf=org)
-        data['orgs'][org.name] = orgapi.yaml_template()
+        data["orgs"][org.name] = orgapi.yaml_template()
 
-    click.echo(yaml.safe_dump(
-        data,
-        allow_unicode=True,
-        default_flow_style=False,
-    ))
+    click.echo(
+        yaml.safe_dump(
+            data,
+            allow_unicode=True,
+            default_flow_style=False,
+        )
+    )

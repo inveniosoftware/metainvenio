@@ -36,7 +36,7 @@ from metainvenio.config import ConfigParser
 @pytest.yield_fixture()
 def ymlfp():
     """File pointer to YAML configuration file."""
-    fp = open(join(dirname(__file__), 'repositories.yml'), 'r')
+    fp = open(join(dirname(__file__), "repositories.yml"), "r")
     yield fp
     fp.close()
 
@@ -44,7 +44,7 @@ def ymlfp():
 @pytest.fixture()
 def empty_ymlfp():
     """File pointer to YAML configuration file."""
-    return ''
+    return ""
 
 
 @pytest.fixture()
@@ -56,4 +56,4 @@ def conf(ymlfp):
 @pytest.fixture()
 def confrepo(ymlfp):
     """Test configuration for single repository."""
-    return ConfigParser(ymlfp, repository='myorg/testrepo')
+    return ConfigParser(ymlfp, repository="myorg/testrepo")

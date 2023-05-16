@@ -36,30 +36,28 @@ from .main import cli
 @click.pass_context
 def pypi(ctx):
     """Repository management for PyPI."""
-    ctx.obj['client'] = PyPIAPI()
+    ctx.obj["client"] = PyPIAPI()
 
 
-@pypi.command('latest-release')
+@pypi.command("latest-release")
 @click.pass_context
 def pypi_latest_release(ctx):
     """Get latest release."""
-    conf = ctx.obj['config']
-    pypi = ctx.obj['client']
+    conf = ctx.obj["config"]
+    pypi = ctx.obj["client"]
 
     for repo in conf.repositories:
         data = pypi.latest_release(repo.name)
         if not data:
-            click.echo(
-                '{}: '.format(repo.slug) +
-                click.style('failed', fg='red')
-            )
+            click.echo("{}: ".format(repo.slug) + click.style("failed", fg="red"))
         else:
-            status = pypi.development_status(data['info']['classifiers'])
-            release = data['releases'][data['info']['version']][0]
-            click.echo('{repo}: {version} ({status} - {release_date})'.format(
+            status = pypi.development_status(data["info"]["classifiers"])
+            release = data["releases"][data["info"]["version"]][0]
+            click.echo(
+                "{repo}: {version} ({status} - {release_date})".format(
                     repo=repo.slug,
-                    version=data['info']['version'],
+                    version=data["info"]["version"],
                     status=status,
-                    release_date=release['upload_time'][:10],
+                    release_date=release["upload_time"][:10],
                 )
             )
